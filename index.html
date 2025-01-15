@@ -2275,16 +2275,16 @@
       ];
 
         let currentScore = 0;
-        const scoreDisplay = document.getElementById('score');
-        
-        // Function to shuffle an array using Fisher-Yates algorithm
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
+const scoreDisplay = document.getElementById('score');
+
+// Function to shuffle an array using Fisher-Yates algorithm
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
 
 function createQuiz() {
     const container = document.getElementById('quiz-container');
@@ -2359,15 +2359,17 @@ function checkAnswer(questionId, selected, correct) {
     
     scoreDisplay.textContent = currentScore;
 
+    /*
     // Disable all radio buttons for this question after an answer is selected
     const options = document.querySelectorAll(`input[name="${questionId}"]`);
     options.forEach(option => {
         option.disabled = true;
     });
+    */
 }
 
-        // Initialize the quiz when the page loads
-        window.onload = createQuiz;
+// Initialize the quiz when the page loads
+window.onload = createQuiz;
     </script>
 </body>
 </html>
