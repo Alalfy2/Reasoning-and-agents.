@@ -1320,7 +1320,7 @@
             { "value": "c", "text": "Bayesian reasoning" },
             { "value": "d", "text": "All of the above" }
         ],
-        "correct": "d",
+        "correct": "c",
         "explanation": "Bayes' theorem, also known as Bayes' law or Bayesian reasoning, is used to determine the probability of an event based on uncertain knowledge."
     },
     {
@@ -1392,7 +1392,7 @@
             { "value": "c", "text": "Feature-Based Representation" },
             { "value": "d", "text": "deterministic action" }
         ],
-        "correct": "c",
+        "correct": "b",
         "explanation": "Feature-Based Representation is used to specify the values of primitive features in a state based on the previous state and the action taken by the agent."
     },
     {
@@ -1464,7 +1464,7 @@
             { "value": "c", "text": "Monotonic reasoning" },
             { "value": "d", "text": "Non- Monotonic reasoning" }
         ],
-        "correct": "a",
+        "correct": "c",
         "explanation": "The statement 'Earth revolves around the Sun' is an example of certain reasoning, as it is a well-established fact with no uncertainty."
     },
     {
@@ -2286,22 +2286,20 @@
             return array;
         }
 
-        function createQuiz() {
+function createQuiz() {
     const container = document.getElementById('quiz-container');
     
-    /*
     // Shuffle the questions array
-    const shuffledQuestions = shuffleArray([...questions]); // تم تعليق الخلط
-    */
+    const shuffledQuestions = shuffleArray([...questions]); // تم إعادة تمكين خلط الأسئلة
     
-    // استخدام الأسئلة الأصلية بدون خلط
-    questions.forEach((question, index) => {
+    // استخدام الأسئلة المخلوطة
+    shuffledQuestions.forEach((question, index) => {
         const questionCard = document.createElement('div');
         questionCard.className = 'question-card';
         
         /*
         // Shuffle the options for each question
-        const shuffledOptions = shuffleArray([...question.options]); // تم تعليق الخلط
+        const shuffledOptions = shuffleArray([...question.options]); // تم تعليق خلط الخيارات
         */
         
         // استخدام الخيارات الأصلية بدون خلط
