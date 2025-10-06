@@ -13,7 +13,7 @@
             margin: 0;
             background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
             font-family: 'Arial', sans-serif;
-            overflow: hidden; /* يمنع ظهور scrollbars لما الزرار يهرب */
+            overflow: hidden; 
         }
 
         .container {
@@ -21,13 +21,14 @@
             padding: 20px;
         }
 
-        #question-container img {
+        #question-container img, #result-container img {
             width: 200px;
-            height: 200px;
+            max-width: 80vw; /* عشان الصورة متكبرش أوي على الشاشات الصغيرة */
+            height: auto;
         }
 
         h2 {
-            font-size: 2.5rem;
+            font-size: clamp(1.5rem, 6vw, 2.5rem); /* حجم خط متغير عشان يناسب الموبايل */
             color: #5b3e3e;
             margin: 20px 0;
         }
@@ -35,10 +36,9 @@
         .buttons {
             display: flex;
             justify-content: center;
+            align-items: center; /* عشان الأزرار تبقى على نفس الخط */
             gap: 20px;
             margin-top: 20px;
-            /* لازم الكونتينر ده يكون relative عشان الزرار اللي بيهرب يفضل جواه */
-            position: relative; 
             height: 50px;
         }
 
@@ -54,35 +54,30 @@
         }
 
         #yes-btn {
-            background-color: #4CAF50; /* أخضر */
+            background-color: #4CAF50;
+            /* هندي له أولوية عشان يفضل ظاهر فوق زرار No لو جم فوق بعض بالصدفة */
+            z-index: 2; 
         }
         #yes-btn:hover {
             transform: scale(1.1);
         }
 
         #no-btn {
-            background-color: #f44336; /* أحمر */
-            /* أهم حاجة هنا عشان نقدر نحركه بحرية */
-            position: absolute; 
+            background-color: #f44336;
+            position: absolute; /* مهم عشان الحركة العشوائية */
+            z-index: 1;
         }
         
         #result-container {
-            /* بنخفي النتيجة في الأول */
             display: none; 
         }
-
-        #result-container img {
-            width: 250px;
-            height: 250px;
-        }
-
     </style>
 </head>
 <body>
     <audio id="celebration-music" src="https://cdn.pixabay.com/audio/2022/02/14/audio_204179155d.mp3"></audio>
 
     <div id="question-container" class="container">
-        <img src="https://media1.tenor.com/m/l1h-a2F6fHAAAAAC/mocha-and-milk-mocha.gif" alt="Asking Bear">
+        <img src="https://media.tenor.com/ASK-q0W2d5AAAAi/bear-love.gif" alt="Asking Bear">
         <h2>Do you love me?</h2>
         <div class="buttons">
             <button id="yes-btn">Yes</button>
@@ -91,7 +86,7 @@
     </div>
 
     <div id="result-container" class="container">
-        <img src="https://media1.tenor.com/m/gUiu1zyxfzYAAAAj/love-bear.gif" alt="Happy Bears">
+        <img src="https://media.tenor.com/gUiu1zyxfzYAAAAi/bear-kiss-bear-love.gif" alt="Happy Bears">
         <h2>I knew it! 🥰</h2>
     </div>
 
@@ -101,32 +96,34 @@
         const questionContainer = document.getElementById('question-container');
         const resultContainer = document.getElementById('result-container');
         const music = document.getElementById('celebration-music');
+        
+        // وظيفة لتحريك الزرار لمكان عشوائي
+        function moveButton() {
+            const containerRect = document.body.getBoundingClientRect();
+            const btnRect = noBtn.getBoundingClientRect();
 
-        // --- الجزء الخاص بزرار "No" اللي بيهرب ---
-        noBtn.addEventListener('mouseover', () => {
-            // بنجيب أبعاد الشاشة
-            const maxWidth = window.innerWidth - noBtn.clientWidth;
-            const maxHeight = window.innerHeight - noBtn.clientHeight;
+            const randomX = Math.random() * (containerRect.width - btnRect.width);
+            const randomY = Math.random() * (containerRect.height - btnRect.height);
 
-            // بنختار مكان عشوائي جديد
-            const randomX = Math.floor(Math.random() * maxWidth);
-            const randomY = Math.floor(Math.random() * maxHeight);
-
-            // بنحرك الزرار للمكان الجديد
+            noBtn.style.position = 'fixed'; // استخدام fixed عشان يتحرك بالنسبة للشاشة كلها
             noBtn.style.left = randomX + 'px';
             noBtn.style.top = randomY + 'px';
+        }
+
+        // --- ده الجزء الخاص بالكمبيوتر (لما الماوس يقرب) ---
+        noBtn.addEventListener('mouseover', moveButton);
+
+        // --- وده الجزء الجديد الخاص بالموبايل (لما حد يلمس الزرار) ---
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // يمنع أي أحداث أخرى زي الـ click
+            moveButton();
         });
 
 
         // --- الجزء الخاص بزرار "Yes" ---
         yesBtn.addEventListener('click', () => {
-            // 1. اخفي شاشة السؤال
             questionContainer.style.display = 'none';
-
-            // 2. أظهر شاشة النتيجة
             resultContainer.style.display = 'block';
-
-            // 3. شغل الموسيقى
             music.play();
         });
     </script>
