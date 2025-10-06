@@ -1,210 +1,134 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Special Message For You</title>
+    <title>سؤال مهم...</title>
     <style>
-        /* CSS Code for Styling */
         body {
-            margin: 0;
-            background-color: #0f0f20; /* خلفية أغمق عشان النجوم تبان */
-            overflow: hidden; /* بنخفي أي حاجة تطلع بره الشاشة */
-        }
-
-        /* ده للنجوم اللي بتتحرك في الخلفية */
-        #particle-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1; /* خلف الكلام */
-        }
-
-        .content-container {
-            position: relative;
-            z-index: 2; /* فوق الخلفية */
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            color: #fff;
-            font-family: 'Trebuchet MS', sans-serif;
-            font-size: 10vw;
-            font-weight: bold;
-            text-transform: uppercase;
+            margin: 0;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            font-family: 'Cairo', sans-serif; /* خط عربي لطيف */
+            overflow: hidden;
+            text-align: center;
         }
 
-        .word {
+        .container {
+            padding: 20px;
+        }
+
+        .main-image {
+            width: 200px;
+            max-width: 60vw;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 7vw, 2.5rem);
+            color: #5b3e3e;
+            margin: 20px 0;
+        }
+
+        .buttons-container {
             display: flex;
-            margin: 0 1vw;
+            justify-content: center;
+            align-items: center;
+            gap: 15px; /* مسافة بين الزرارين */
+            height: 50px;
+            position: relative; /* مهم عشان نحدد حركة زر "لا" في البداية */
         }
 
-        /* كل حرف لوحده عشان نقدر نحركه */
-        .letter, .heart {
-            display: inline-block;
-            opacity: 0; /* بنخفيهم في الأول */
-            transform: translateY(-100px) rotate(20deg); /* بنخليهم فوق الشاشة ومائلين */
+        button {
+            padding: 10px 25px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            /* التعديل الجديد: لون الزرار أبيض */
+            background-color: white; 
+            /* التعديل الجديد: لون الخط أسود */
+            color: #333;
+        }
+        
+        #yes-btn:hover {
+            transform: scale(1.1);
+            background-color: #e8f5e9; /* لون أخضر فاتح عند التأشير */
         }
 
-        .heart {
-            color: #ff4757;
-            font-size: 8vw;
-            position: absolute; /* بنخليه حر الحركة عشان نحطه في النص */
-            opacity: 0;
-            transform: scale(0);
+        #no-btn {
+            /* لازم يكون absolute عشان نعرف نحركه */
+            position: absolute;
+        }
+
+        #result-container {
+            display: none;
         }
     </style>
 </head>
 <body>
+    <audio id="celebration-music" src="https://cdn.pixabay.com/audio/2022/02/14/audio_204179155d.mp3" loop></audio>
 
-    <canvas id="particle-canvas"></canvas>
-
-    <div class="content-container">
-        <div class="word" id="i-word">
-            <span class="letter">I</span>
+    <div id="question-container" class="container">
+        <img class="main-image" src="https://media.tenor.com/ASK-q0W2d5AAAAi/bear-love.gif" alt="Cute Bear">
+        <h2>بتحبيني؟</h2>
+        <div class="buttons-container">
+            <button id="yes-btn">أيوة</button>
+            <button id="no-btn">لأ</button>
         </div>
-        <div class="word" id="love-word">
-            <span class="letter">L</span>
-            <span class="letter">O</span>
-            <span class="letter">V</span>
-            <span class="letter">E</span>
-        </div>
-        <div class="word" id="you-word">
-            <span class="letter">Y</span>
-            <span class="letter">O</span>
-            <span class="letter">U</span>
-        </div>
-        
-        <div class="heart">❤️</div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+    <div id="result-container" class="container">
+        <img class="main-image" src="https://media.tenor.com/gUiu1zyxfzYAAAAi/bear-kiss-bear-love.gif" alt="Happy Bears">
+        <h2>كنت عارف! 🥰</h2>
+    </div>
 
     <script>
-        // --- الجزء الأول: الأنيميشن بتاع النجوم المتحركة ---
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const yesBtn = document.getElementById('yes-btn');
+        const noBtn = document.getElementById('no-btn');
+        const questionContainer = document.getElementById('question-container');
+        const resultContainer = document.getElementById('result-container');
+        const music = document.getElementById('celebration-music');
 
-        let particlesArray = [];
-        const numberOfParticles = 150; // تقدر تزود أو تقلل عدد النجوم
+        // هذه الوظيفة مسؤولة عن تحريك الزر لمكان عشوائي داخل الصفحة
+        function moveButton() {
+            // أبعاد الصفحة المرئية
+            const viewWidth = window.innerWidth;
+            const viewHeight = window.innerHeight;
 
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 1;
-                this.speedX = Math.random() * 1 - 0.5;
-                this.speedY = Math.random() * 1 - 0.5;
-                this.color = 'rgba(255, 255, 255, 0.8)';
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.size > 0.2) this.size -= 0.01;
-            }
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            // أبعاد الزر نفسه
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+
+            // بنختار إحداثيات جديدة بحيث الزر لا يخرج عن الشاشة
+            const randomX = Math.floor(Math.random() * (viewWidth - btnWidth));
+            const randomY = Math.floor(Math.random() * (viewHeight - btnHeight));
+
+            noBtn.style.position = 'fixed'; // 'fixed' يضمن أنه يتحرك بالنسبة للشاشة كلها
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
         }
 
-        function initParticles() {
-            for (let i = 0; i < numberOfParticles; i++) {
-                particlesArray.push(new Particle());
-            }
-        }
-
-        function handleParticles() {
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-                particlesArray[i].draw();
-                if (particlesArray[i].size <= 0.3) {
-                    particlesArray.splice(i, 1);
-                    particlesArray.push(new Particle());
-                    i--;
-                }
-            }
-        }
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            handleParticles();
-            requestAnimationFrame(animateParticles);
-        }
-
-        initParticles();
-        animateParticles();
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            particlesArray = [];
-            initParticles();
+        // عند لمس زر "لا" على الموبايل
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // لمنع أي سلوك افتراضي للمتصفح
+            moveButton();
         });
+        
+        // عند تحريك الماوس فوق زر "لا" على الكمبيوتر
+        noBtn.addEventListener('mouseover', moveButton);
 
-
-        // --- الجزء التاني: الأنيميشن بتاع الكلام والقلب ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const tl = gsap.timeline({
-                // لما الأنيميشن يخلص، استنى ثانيتين وبعدين ابدأ من الأول
-                onComplete: () => {
-                    gsap.delayedCall(2, () => tl.restart());
-                }
-            });
-
-            // الخطوة 1: ظهور الحروف واحد ورا التاني
-            tl.to(".letter", {
-                opacity: 1,
-                transform: "translateY(0) rotate(0)",
-                duration: 1,
-                ease: "elastic.out(1, 0.5)",
-                stagger: 0.1 // دي اللي بتخليهم يظهروا بالترتيب
-            });
-
-            // الخطوة 2: استنى ثانية بعد ما الحروف تظهر
-            tl.to({}, { duration: 1 });
-
-            // الخطوة 3: حروف كلمة "LOVE" بتطير لفوق وتختفي
-            tl.to("#love-word .letter", {
-                opacity: 0,
-                y: -100,
-                scale: 0.5,
-                rotation: gsap.utils.random(-45, 45),
-                duration: 0.5,
-                stagger: 0.1
-            });
-
-            // الخطوة 4: القلب بيظهر مكان كلمة "LOVE" وبينبض
-            tl.to(".heart", {
-                opacity: 1,
-                scale: 1,
-                duration: 1,
-                ease: "elastic.out(1, 0.4)"
-            }, "<0.5"); // "<0.5" معناها إن الحركة دي تبدأ نص ثانية بعد بداية الحركة اللي قبلها
-
-            // الخطوة 5: بنخلي القلب ينبض شوية
-            tl.to(".heart", {
-                scale: 1.2,
-                duration: 0.4,
-                ease: "power1.inOut",
-                yoyo: true, // يويو يعني الحركة تروح وترجع
-                repeat: 3 // كرر النبض 3 مرات
-            });
-
-            // الخطوة 6: كل حاجة بتختفي عشان الأنيميشن يبدأ من جديد
-            tl.to(".letter, .heart", {
-                opacity: 0,
-                scale: 0,
-                duration: 0.5,
-                ease: "power2.in",
-                stagger: 0.1,
-                delay: 1.5 // استنى ثانية ونص قبل ما تختفي
-            });
+        // عند الضغط على زر "نعم"
+        yesBtn.addEventListener('click', () => {
+            questionContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+            music.play();
         });
     </script>
 </body>
