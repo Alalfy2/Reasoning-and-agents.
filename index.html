@@ -3,93 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I Love You</title>
+    <title>A Special Message For You</title>
     <style>
         /* CSS Code for Styling */
         body {
-            /* لون الخلفية، تقدر تغيره لأي لون يعجبك */
-            background-color: #1a1a2e;
+            margin: 0;
+            background-color: #0f0f20; /* خلفية أغمق عشان النجوم تبان */
+            overflow: hidden; /* بنخفي أي حاجة تطلع بره الشاشة */
+        }
+
+        /* ده للنجوم اللي بتتحرك في الخلفية */
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* خلف الكلام */
+        }
+
+        .content-container {
+            position: relative;
+            z-index: 2; /* فوق الخلفية */
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
-        }
-
-        .container {
-            display: flex;
-            align-items: center;
-            font-size: 8vw; /* حجم الخط بيكبر ويصغر مع حجم الشاشة */
+            color: #fff;
+            font-family: 'Trebuchet MS', sans-serif;
+            font-size: 10vw;
             font-weight: bold;
-            color: #ffffff; /* لون الكلام */
+            text-transform: uppercase;
         }
 
-        .text, .heart {
-            /* دي بتخلي العناصر شفافة في البداية عشان تظهر بالحركة */
-            opacity: 0;
-            transform: scale(0); /* بتبدأ بحجم صفر */
+        .word {
+            display: flex;
+            margin: 0 1vw;
+        }
+
+        /* كل حرف لوحده عشان نقدر نحركه */
+        .letter, .heart {
+            display: inline-block;
+            opacity: 0; /* بنخفيهم في الأول */
+            transform: translateY(-100px) rotate(20deg); /* بنخليهم فوق الشاشة ومائلين */
         }
 
         .heart {
-            color: #e94560; /* لون القلب */
-            margin: 0 20px;
-            font-size: 7vw;
+            color: #ff4757;
+            font-size: 8vw;
+            position: absolute; /* بنخليه حر الحركة عشان نحطه في النص */
+            opacity: 0;
+            transform: scale(0);
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <span class="text" id="i">I</span>
-        <span class="heart">❤️</span>
-        <span class="text" id="you">U</span>
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="content-container">
+        <div class="word" id="i-word">
+            <span class="letter">I</span>
+        </div>
+        <div class="word" id="love-word">
+            <span class="letter">L</span>
+            <span class="letter">O</span>
+            <span class="letter">V</span>
+            <span class="letter">E</span>
+        </div>
+        <div class="word" id="you-word">
+            <span class="letter">Y</span>
+            <span class="letter">O</span>
+            <span class="letter">U</span>
+        </div>
+        
+        <div class="heart">❤️</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
 
     <script>
-        // بنجهز خط زمني للأنيميشن عشان الحركات تشتغل ورا بعض
-        const tl = gsap.timeline({
-            // onComplete بيخلي الأنيميشن يعيد نفسه لما يخلص
-            onComplete: function() {
-                this.restart();
+        // --- الجزء الأول: الأنيميشن بتاع النجوم المتحركة ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray = [];
+        const numberOfParticles = 150; // تقدر تزود أو تقلل عدد النجوم
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = 'rgba(255, 255, 255, 0.8)';
             }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.size > 0.2) this.size -= 0.01;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function handleParticles() {
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                if (particlesArray[i].size <= 0.3) {
+                    particlesArray.splice(i, 1);
+                    particlesArray.push(new Particle());
+                    i--;
+                }
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            handleParticles();
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particlesArray = [];
+            initParticles();
         });
 
-        // أول حركة: ظهور حرف "I"
-        tl.to("#i", {
-            opacity: 1, // يظهر
-            scale: 1, // يكبر لحجمه الطبيعي
-            duration: 0.8, // مدة الحركة بالثواني
-            ease: "elastic.out(1, 0.5)" // شكل الحركة (زي الأستك)
-        });
 
-        // تاني حركة: ظهور القلب
-        tl.to(".heart", {
-            opacity: 1,
-            scale: 1.2, // هنخليه يكبر شوية زيادة عشان يدي إحساس بالنبض
-            duration: 0.8,
-            ease: "elastic.out(1, 0.5)"
-        }, "-=0.5"); // "-=0.5" معناها إن الحركة دي تبدأ قبل ما اللي قبلها تخلص بنص ثانية
+        // --- الجزء التاني: الأنيميشن بتاع الكلام والقلب ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const tl = gsap.timeline({
+                // لما الأنيميشن يخلص، استنى ثانيتين وبعدين ابدأ من الأول
+                onComplete: () => {
+                    gsap.delayedCall(2, () => tl.restart());
+                }
+            });
 
-        // تالت حركة: ظهور حرف "U"
-        tl.to("#you", {
-            opacity: 1,
-            scale: 1,
-            duration: 0.8,
-            ease: "elastic.out(1, 0.5)"
-        }, "-=0.5");
+            // الخطوة 1: ظهور الحروف واحد ورا التاني
+            tl.to(".letter", {
+                opacity: 1,
+                transform: "translateY(0) rotate(0)",
+                duration: 1,
+                ease: "elastic.out(1, 0.5)",
+                stagger: 0.1 // دي اللي بتخليهم يظهروا بالترتيب
+            });
 
-        // حركة أخيرة: كلها بتختفي عشان تبدأ من جديد
-        tl.to(".container span", {
-            opacity: 0,
-            scale: 0,
-            duration: 0.5,
-            stagger: 0.2, // بيخلي كل عنصر يختفي بعد اللي قبله بـ 0.2 ثانية
-            ease: "power2.in",
-            delay: 1.5 // استنى ثانية ونص قبل ما تختفي
+            // الخطوة 2: استنى ثانية بعد ما الحروف تظهر
+            tl.to({}, { duration: 1 });
+
+            // الخطوة 3: حروف كلمة "LOVE" بتطير لفوق وتختفي
+            tl.to("#love-word .letter", {
+                opacity: 0,
+                y: -100,
+                scale: 0.5,
+                rotation: gsap.utils.random(-45, 45),
+                duration: 0.5,
+                stagger: 0.1
+            });
+
+            // الخطوة 4: القلب بيظهر مكان كلمة "LOVE" وبينبض
+            tl.to(".heart", {
+                opacity: 1,
+                scale: 1,
+                duration: 1,
+                ease: "elastic.out(1, 0.4)"
+            }, "<0.5"); // "<0.5" معناها إن الحركة دي تبدأ نص ثانية بعد بداية الحركة اللي قبلها
+
+            // الخطوة 5: بنخلي القلب ينبض شوية
+            tl.to(".heart", {
+                scale: 1.2,
+                duration: 0.4,
+                ease: "power1.inOut",
+                yoyo: true, // يويو يعني الحركة تروح وترجع
+                repeat: 3 // كرر النبض 3 مرات
+            });
+
+            // الخطوة 6: كل حاجة بتختفي عشان الأنيميشن يبدأ من جديد
+            tl.to(".letter, .heart", {
+                opacity: 0,
+                scale: 0,
+                duration: 0.5,
+                ease: "power2.in",
+                stagger: 0.1,
+                delay: 1.5 // استنى ثانية ونص قبل ما تختفي
+            });
         });
     </script>
 </body>
